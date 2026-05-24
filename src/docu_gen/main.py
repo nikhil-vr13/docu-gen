@@ -219,10 +219,10 @@ def init(path: str):
 
 @cli.command()
 @click.option("--api-key", help="API key for LLM provider")
-@click.option("--provider", default="openai", help="LLM provider (openai, anthropic, ollama)")
-@click.option("--model", help="Model name (e.g. gpt-4o, claude-sonnet-4)")
+@click.option("--provider", help="LLM provider (openai, anthropic, gemini, ollama)")
+@click.option("--model", help="Model name (e.g. gpt-4o, claude-sonnet-4, gemini-2.0-flash)")
 @click.pass_context
-def test_llm(ctx: click.Context, api_key: Optional[str], provider: str, model: Optional[str]):
+def test_llm(ctx: click.Context, api_key: Optional[str], provider: Optional[str], model: Optional[str]):
     """Test LLM connection with current config."""
     config: Config = ctx.obj["config"]
     if api_key:
