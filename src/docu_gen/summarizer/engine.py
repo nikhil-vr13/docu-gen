@@ -128,6 +128,8 @@ def _call_llm(prompt: str, config: Config) -> str:
         return _call_anthropic(prompt, config)
     elif provider == "ollama":
         return _call_ollama(prompt, config)
+    elif provider == "gemini":
+        return _call_gemini(prompt, config)
     else:
         raise SummarizeError(f"Unsupported LLM provider: {provider}")
 
@@ -194,6 +196,27 @@ def _call_ollama(prompt: str, config: Config) -> str:
         raise SummarizeError("httpx is required for Ollama calls")
     except Exception as e:
         raise SummarizeError(f"Ollama call failed: {e}")
+
+
+def _call_gemini(prompt: str, config: Config) -> str:
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        raise SummarizeError(
+            "google-generativeai package not installed. Run: pip install google-generativeai"
+        )
+
+    genai.configure(api_key=config.llm.api_key)
+    model = genai.GenerativeModel(
+        config.llm.model or "gemini-2.0-flash",
+        system_instruction="You are a technical documentation writer. Respond only with valid JSON.",
+        generation_config=genai.types.GenerationConfig(
+            temperature=config.llm.temperature,
+            response_mime_type="application/json",
+        ),
+    )
+    response = model.generate_content(prompt)
+    return response.text
 
 
 def _parse_llm_response(response: str) -> dict:

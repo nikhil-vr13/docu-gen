@@ -25,7 +25,8 @@ dependencies = [
 [project.optional-dependencies]
 openai = ["openai>=1.0"]
 anthropic = ["anthropic>=0.30"]
-all = ["docu-gen[openai,anthropic]"]
+gemini = ["google-generativeai>=0.8"]
+all = ["docu-gen[openai,anthropic,gemini]"]
 
 [project.scripts]
 docu-gen = "docu_gen.main:entry_point"

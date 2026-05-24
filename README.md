@@ -39,14 +39,38 @@ docu-gen from-git main --preview
 
 ## LLM Support
 
-docu-gen uses an LLM (OpenAI, Anthropic, or Ollama) to intelligently group and summarize changes. Without an API key, it falls back to template-based grouping by commit category.
+docu-gen uses an LLM to intelligently group and summarize changes. Without an API key, it falls back to template-based grouping by commit category.
+
+### Supported providers
+
+| Provider | `provider` value | Install | Default model |
+|---|---|---|---|
+| OpenAI | `openai` | `pip install openai` | `gpt-4o` |
+| Anthropic | `anthropic` | `pip install anthropic` | `claude-sonnet-4` |
+| Google Gemini | `gemini` | `pip install google-generativeai` | `gemini-2.0-flash` |
+| Ollama (local) | `ollama` | (built-in via httpx) | `llama3` |
+
+```yaml
+# docu-gen.yaml
+llm:
+  provider: gemini         # openai | anthropic | gemini | ollama
+  api_key: AIza...         # or set DOCU_GEN_LLM_API_KEY env var
+  model: gemini-2.0-flash  # any model name
+  temperature: 0.3
+```
 
 ```bash
 # Test your LLM connection
 docu-gen test-llm
 
 # Override model per-run
-docu-gen from-git main --model gpt-4o
+docu-gen from-git main --model gemini-2.0-flash
+```
+
+Install extras:
+```bash
+pip install -e ".[gemini]"       # just Gemini
+pip install -e ".[all]"          # all providers
 ```
 
 ## Configuration
@@ -58,9 +82,11 @@ All options in `docu-gen.yaml` or environment variables:
 | `DOCU_GEN_CONFLUENCE_URL` | Confluence base URL |
 | `DOCU_GEN_CONFLUENCE_API_TOKEN` | API token |
 | `DOCU_GEN_CONFLUENCE_SPACE_KEY` | Space key |
-| `DOCU_GEN_LLM_API_KEY` | OpenAI/Anthropic API key |
+| `DOCU_GEN_LLM_API_KEY` | LLM API key |
 | `DOCU_GEN_LLM_MODEL` | Model name (default: gpt-4o) |
-| `OPENAI_API_KEY` | Fallback key |
+| `DOCU_GEN_LLM_PROVIDER` | Provider (openai, anthropic, gemini, ollama) |
+| `OPENAI_API_KEY` | Fallback for openai provider |
+| `ANTHROPIC_API_KEY` | Fallback for anthropic provider |
 
 ## Project Structure
 
