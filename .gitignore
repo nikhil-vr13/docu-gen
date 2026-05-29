@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 *.egg-info/
 docu-gen.yaml
+.DS_Store
+*.md
+!README.md
+build/
