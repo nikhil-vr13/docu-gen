@@ -8,12 +8,13 @@ from typing import Any, Optional
 from ..models import ChangeType, Commit, FileChange, Session, SessionMessage, ToolCall
 
 
-def parse_opencode_log(filepath: str) -> Optional[Session]:
+def parse_opencode_log(filepath: str, raw: Optional[str] = None) -> Optional[Session]:
     path = Path(filepath)
     if not path.exists():
         return None
 
-    raw = path.read_text(encoding="utf-8")
+    if raw is None:
+        raw = path.read_text(encoding="utf-8")
     data = json.loads(raw) if raw.strip().startswith("{") else _parse_ndjson(raw)
 
     session = Session(
@@ -108,12 +109,13 @@ def parse_claude_log(filepath: str) -> Optional[Session]:
     return session
 
 
-def parse_opencode_export(filepath: str) -> Optional[Session]:
+def parse_opencode_export(filepath: str, raw: Optional[str] = None) -> Optional[Session]:
     path = Path(filepath)
     if not path.exists():
         return None
 
-    raw = path.read_text(encoding="utf-8")
+    if raw is None:
+        raw = path.read_text(encoding="utf-8")
     data = json.loads(raw)
 
     info = data.get("info", {})
@@ -187,14 +189,20 @@ def parse_session_log(filepath: str) -> Optional[Session]:
     if not path.exists():
         return None
 
-    raw = path.read_text(encoding="utf-8")
+    raw = path.read_text(encoding="utf-8").lstrip()
+
+    if raw.startswith("Exporting session"):
+        first_nl = raw.find("\n")
+        if first_nl != -1:
+            raw = raw[first_nl + 1 :]
 
     try:
         data = json.loads(raw)
         if isinstance(data, dict) and "info" in data and "messages" in data:
             msgs = data.get("messages", [])
             if msgs and any("parts" in m for m in msgs):
-                return parse_opencode_export(filepath)
+                return parse_opencode_export(filepath, raw)
+            return parse_opencode_log(filepath, raw)
     except Exception:
         pass
 
